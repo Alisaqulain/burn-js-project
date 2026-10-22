@@ -1,0 +1,7 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["bun"]
+  },
+  "include": ["bun/**/*.ts", "node/**/*.ts", "loadgen/**/*.ts", "common/**/*.ts"]
+}

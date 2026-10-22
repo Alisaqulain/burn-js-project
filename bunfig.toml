@@ -1,0 +1,6 @@
+# Bun configuration for the BunBench monorepo.
+# Frontend component tests use their own bunfig in apps/web (DOM preload).
+
+[test]
+# Unit tests never depend on benchmark speeds; this gives slow machines headroom.
+timeout = 30000

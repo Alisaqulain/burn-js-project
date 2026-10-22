@@ -1,1 +1,30 @@
+<<<<<<< HEAD
 node_modules
+=======
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local databases, backups and generated reports
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+reports/
+backups/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
+>>>>>>> 8fdb731 (pushing project)

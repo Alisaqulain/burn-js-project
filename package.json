@@ -1,0 +1,48 @@
+{
+  "name": "bunbench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Benchmark Bun and Node.js with repeatable, measured workloads.",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "runners"
+  ],
+  "engines": {
+    "bun": ">=1.2.0",
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "bun scripts/dev.ts",
+    "dev:api": "bun --watch apps/api/src/index.ts",
+    "dev:web": "bun run --cwd apps/web dev",
+    "start": "bun apps/api/src/index.ts",
+    "build": "bun scripts/build.ts",
+    "typecheck": "bun scripts/typecheck.ts",
+    "lint": "eslint .",
+    "test": "bun scripts/test.ts unit",
+    "test:unit": "bun scripts/test.ts unit",
+    "test:integration": "bun scripts/test.ts integration",
+    "test:node": "node --test --test-reporter=spec runners/node/test/node-runner.test.ts",
+    "test:all": "bun scripts/test.ts all",
+    "db:migrate": "bun scripts/migrate.ts",
+    "db:reset": "bun scripts/db-reset.ts",
+    "db:backup": "bun scripts/db-backup.ts",
+    "smoke": "bun scripts/smoke.ts",
+    "check": "bun run typecheck && bun run lint && bun run test:all && bun run build"
+  },
+  "devDependencies": {
+    "@bunbench/api": "workspace:*",
+    "@bunbench/benchmark-core": "workspace:*",
+    "@bunbench/shared": "workspace:*",
+    "@eslint/js": "^10.0.1",
+    "@types/bun": "^1.4.3",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.13.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.0"
+  }
+}

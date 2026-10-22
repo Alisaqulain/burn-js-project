@@ -1,0 +1,3 @@
+# Component tests run in a happy-dom environment (run from apps/web: `bun test`).
+[test]
+preload = ["./test/setup.ts"]

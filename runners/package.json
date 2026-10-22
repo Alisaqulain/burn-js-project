@@ -1,0 +1,11 @@
+{
+  "name": "@bunbench/runners",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent benchmark runner processes. bun/* runs only under Bun, node/* only under Node.js.",
+  "dependencies": {
+    "@bunbench/benchmark-core": "workspace:*",
+    "@bunbench/shared": "workspace:*"
+  }
+}

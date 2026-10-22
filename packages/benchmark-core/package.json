@@ -1,0 +1,17 @@
+{
+  "name": "@bunbench/benchmark-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./workloads": "./src/workloads/index.ts",
+    "./runner-loop": "./src/runner-loop.ts",
+    "./stats": "./src/stats.ts",
+    "./protocol": "./src/protocol.ts",
+    "./orchestrator": "./src/orchestrator/index.ts"
+  },
+  "dependencies": {
+    "@bunbench/shared": "workspace:*"
+  }
+}

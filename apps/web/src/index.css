@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-ring: var(--ring);
+  --color-good: var(--good);
+  --color-good-text: var(--good-text);
+  --color-warning: var(--warning);
+  --color-critical: var(--critical);
+  --color-critical-text: var(--critical-text);
+  --color-bun: var(--series-bun);
+  --color-node: var(--series-node);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Light theme. Chart tokens follow the validated reference palette (dataviz skill). */
+:root {
+  color-scheme: light;
+  --bg: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f0efec;
+  --border: #e1e0d9;
+  --border-strong: #c3c2b7;
+  --fg: #0b0b0b;
+  --muted: #52514e;
+  --subtle: #6b6a65;
+  --primary: #0b0b0b;
+  --primary-fg: #fcfcfb;
+  --ring: #2a78d6;
+  --good: #0ca30c;
+  --good-text: #006300;
+  --warning: #fab219;
+  --critical: #d03b3b;
+  --critical-text: #b42f2f;
+  --series-bun: #2a78d6;
+  --series-node: #eb6834;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --axis-text: #6b6a65;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --border: #2c2c2a;
+  --border-strong: #383835;
+  --fg: #f0efec;
+  --muted: #c3c2b7;
+  --subtle: #9a9891;
+  --primary: #f0efec;
+  --primary-fg: #0d0d0d;
+  --ring: #3987e5;
+  --good: #0ca30c;
+  --good-text: #3ec43e;
+  --warning: #fab219;
+  --critical: #d03b3b;
+  --critical-text: #f07a7a;
+  --series-bun: #3987e5;
+  --series-node: #d95926;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --axis-text: #9a9891;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recharts: keep chrome recessive and use text tokens. */
+.recharts-cartesian-axis-tick-value {
+  fill: var(--axis-text);
+  font-size: 12px;
+}
+.recharts-legend-item-text {
+  color: var(--muted) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
