@@ -70,7 +70,7 @@ afterEach(() => {
 
 describe("Live run view", () => {
   test("renders streamed progress, cancels, and switches to results when done", async () => {
-    (globalThis as unknown as { EventSource: unknown }).EventSource = FakeEventSource;
+    Object.defineProperty(globalThis, "EventSource", { value: FakeEventSource, writable: true, configurable: true });
     let current: RunDetail = run;
     const calls = mockFetch({
       [`/api/benchmarks/${run.id}/cancel`]: () => ok({ id: run.id, status: "cancelling" }),
@@ -83,6 +83,7 @@ describe("Live run view", () => {
     // 1 of 2 processes done + 4/10 of the current one = 70%.
     expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("70");
 
+    await waitFor(() => expect(FakeEventSource.instances.length).toBeGreaterThan(0));
     const source = FakeEventSource.instances[0]!;
     expect(source.url).toBe(`/api/benchmarks/${run.id}/events`);
     act(() => source.emit({ type: "progress", live: { ...live, iteration: 9 } }));
@@ -100,10 +101,11 @@ describe("Live run view", () => {
   });
 
   test("falls back to polling when the stream fails", async () => {
-    (globalThis as unknown as { EventSource: unknown }).EventSource = FakeEventSource;
+    Object.defineProperty(globalThis, "EventSource", { value: FakeEventSource, writable: true, configurable: true });
     mockFetch({ [`/api/benchmarks/${run.id}`]: () => ok(run) });
     renderAt(`/runs/${run.id}`, <RunPage />, "/runs/:id");
     await screen.findByText("Measured iteration 4 of 10");
+    await waitFor(() => expect(FakeEventSource.instances.length).toBeGreaterThan(0));
     const source = FakeEventSource.instances[0]!;
     act(() => {
       source.readyState = FakeEventSource.CLOSED;

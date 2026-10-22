@@ -2,13 +2,20 @@
 
 BunBench launches operating-system processes on request. Treat it as a **local development tool**.
 
+## Authentication
+
+- **Token for state-changing requests.** When `BUNBENCH_API_TOKEN` is set (at least 32 characters), every POST, PUT and DELETE under `/api` needs `Authorization: Bearer <token>`. Without it the API answers 401. The token is compared in constant time.
+- **Public reads.** GET endpoints (results, history, SSE progress) need no token, so the dashboard works for viewers.
+- **Startup refusal.** The API **refuses to start** on a non-loopback address without a token. `BUNBENCH_ALLOW_UNAUTHENTICATED=true` overrides this; use it only on trusted private networks.
+- **Where the token lives in the browser.** Operators enter it under Settings → API access, and it stays in that browser's `localStorage`. It is never part of the build: `VITE_*` variables are public.
+
 ## Assumptions
 
 - **Loopback only.** The API binds to `127.0.0.1` by default and logs a warning if `BUNBENCH_HOST` is anything else.
-- **No authentication.** There is no authentication and no fake login. Anyone who can reach the port can queue benchmarks, which consumes CPU, and can delete history.
+- **Local default.** For local use no token is configured. Anyone who can reach the port can queue benchmarks, which consumes CPU, and can delete history, so keep the default loopback bind.
 - **Single user.** The only intended user is the person at the machine.
 
-**Do not expose BunBench to an untrusted network.** If you need remote access, put it behind an authenticating reverse proxy (SSO, mTLS or VPN) and run it in an isolated, resource-limited container or VM (see [deployment.md](deployment.md)).
+**Do not expose BunBench to an untrusted network.** For remote access, set `BUNBENCH_API_TOKEN`, serve the API over HTTPS (the included Caddy setup), and run it in a resource-limited container (see [deployment.md](deployment.md)).
 
 ## Process execution safeguards
 

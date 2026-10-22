@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { existsSync, statSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { Hono, type Context } from "hono";
@@ -84,6 +85,20 @@ function nonEmptyQuery(c: Context): Record<string, string> {
   return Object.fromEntries(Object.entries(c.req.query()).filter(([, v]) => v !== ""));
 }
 
+/** Constant-time comparison of a presented bearer token with the configured one. */
+export function tokenMatches(header: string | undefined, token: string): boolean {
+  const match = /^Bearer\s+(.+)$/i.exec(header?.trim() ?? "");
+  if (!match) return false;
+  const presented = Buffer.from(match[1]!.trim());
+  const expected = Buffer.from(token);
+  return presented.length === expected.length && timingSafeEqual(presented, expected);
+}
+
+/** Client address for rate limiting. Behind a trusted proxy, the proxy appends the real address last. */
+export function forwardedClient(header: string | undefined): string | null {
+  return header?.split(",").map((p) => p.trim()).filter(Boolean).at(-1) ?? null;
+}
+
 const idempotencyKeySchema = z.string().regex(/^[A-Za-z0-9_-]{8,64}$/, "Idempotency-Key must be 8-64 characters of [A-Za-z0-9_-]");
 
 export function createApp(deps: AppDeps): Hono {
@@ -96,6 +111,10 @@ export function createApp(deps: AppDeps): Hono {
   const clientKey =
     deps.clientKey ??
     ((c: Context) => {
+      if (config.trustProxy) {
+        const forwarded = forwardedClient(c.req.header("x-forwarded-for"));
+        if (forwarded) return forwarded;
+      }
       try {
         return getConnInfo(c).remote.address ?? "unknown";
       } catch {
@@ -159,7 +178,7 @@ export function createApp(deps: AppDeps): Hono {
     cors({
       origin: (origin) => (allowedOrigins.has(origin) ? origin : null),
       allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowHeaders: ["content-type", "idempotency-key"],
+      allowHeaders: ["content-type", "idempotency-key", "authorization"],
       exposeHeaders: ["content-disposition", "retry-after"],
       maxAge: 600,
     }),
@@ -170,6 +189,18 @@ export function createApp(deps: AppDeps): Hono {
     const origin = c.req.header("origin");
     if (origin && c.req.method !== "GET" && c.req.method !== "OPTIONS" && !allowedOrigins.has(origin)) {
       throw new ApiError(403, "ORIGIN_NOT_ALLOWED", `Origin ${origin} is not allowed. Add it to BUNBENCH_CORS_ORIGINS.`);
+    }
+    await next();
+  });
+
+  // State-changing requests require the bearer token when one is configured. Reads stay public so the
+  // dashboard (including EventSource streams, which cannot send headers) works without credentials.
+  app.use("/api/*", async (c, next) => {
+    const method = c.req.method;
+    const mutating = method !== "GET" && method !== "HEAD" && method !== "OPTIONS";
+    if (config.apiToken && mutating && !tokenMatches(c.req.header("authorization"), config.apiToken)) {
+      c.header("WWW-Authenticate", 'Bearer realm="bunbench"');
+      throw new ApiError(401, "UNAUTHORIZED", "This BunBench API requires an access token for this action. Enter it in Settings → API access.");
     }
     await next();
   });
@@ -204,6 +235,7 @@ export function createApp(deps: AppDeps): Hono {
       uptimeSeconds: Math.round((Date.now() - startedAt) / 1_000),
       database: { ok: dbOk, path: config.dbPath === ":memory:" ? ":memory:" : "configured", schemaVersion, runCount },
       queue: service.queueInfo(),
+      auth: { required: Boolean(config.apiToken) },
     };
     return ok(c, health);
   });

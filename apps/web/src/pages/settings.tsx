@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS, HARD_LIMITS, type Settings, settingsSchema, WORKLOAD_LIMITS } from "@bunbench/shared";
-import { ExternalLink, Save } from "lucide-react";
+import { ExternalLink, KeyRound, Save } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -7,7 +7,8 @@ import { Callout } from "@/components/status";
 import { ErrorState, PageHeader, PageSkeleton } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, Field, Input, Kbd } from "@/components/ui/primitives";
-import { api, describeError } from "@/lib/api";
+import { api, apiOrigin, describeError } from "@/lib/api";
+import { apiToken } from "@/lib/api-token";
 import { formatBytes } from "@/lib/format";
 import { useQuery } from "@/lib/use-api";
 
@@ -89,6 +90,67 @@ function SettingsForm({ initial, onSaved }: { initial: Settings; onSaved: () => 
   );
 }
 
+/** Where this frontend sends API requests, and the optional access token for state-changing actions. */
+function ApiAccessCard({ authRequired }: { authRequired: boolean | undefined }) {
+  const [draft, setDraft] = useState("");
+  const [hasToken, setHasToken] = useState(() => Boolean(apiToken.get()));
+  return (
+    <Card>
+      <CardHeader
+        title={
+          <span className="flex items-center gap-2">
+            <KeyRound aria-hidden className="size-4" /> API access
+          </span>
+        }
+        description="Stored only in this browser. Required when the API server sets BUNBENCH_API_TOKEN."
+      />
+      <CardBody className="space-y-4">
+        <dl className="grid grid-cols-[9rem_1fr] gap-y-2 text-sm">
+          <dt className="text-subtle">API endpoint</dt>
+          <dd className="font-mono text-xs break-all text-fg">{apiOrigin()}/api</dd>
+          <dt className="text-subtle">Token required</dt>
+          <dd className="text-fg">{authRequired === undefined ? "Unknown (API unreachable)" : authRequired ? "Yes, for starting, cancelling and deleting runs" : "No"}</dd>
+          <dt className="text-subtle">Token in this browser</dt>
+          <dd className="text-fg">{hasToken ? "Saved" : "Not set"}</dd>
+        </dl>
+        <form
+          className="flex flex-col gap-2 sm:flex-row"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (draft.trim().length < 32) {
+              toast.error("Token too short", { description: "API tokens are at least 32 characters." });
+              return;
+            }
+            apiToken.set(draft);
+            setDraft("");
+            setHasToken(true);
+            toast.success("API token saved in this browser");
+          }}
+        >
+          <label htmlFor="api-token" className="sr-only">
+            API token
+          </label>
+          <Input id="api-token" type="password" autoComplete="off" placeholder="Paste the API token" value={draft} onChange={(e) => setDraft(e.target.value)} />
+          <Button type="submit" variant="primary" disabled={!draft.trim()}>
+            Save token
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={!hasToken}
+            onClick={() => {
+              apiToken.clear();
+              setHasToken(false);
+              toast.success("API token removed from this browser");
+            }}
+          >
+            Clear
+          </Button>
+        </form>
+      </CardBody>
+    </Card>
+  );
+}
+
 export function SettingsPage() {
   const settings = useQuery(() => api.settings(), "settings");
   const health = useQuery(() => api.health(), "health");
@@ -96,6 +158,9 @@ export function SettingsPage() {
   return (
     <>
       <PageHeader title="Settings" description="Defaults, resource limits, storage and runtime configuration." />
+      <div className="mb-6">
+        <ApiAccessCard authRequired={health.data?.auth.required} />
+      </div>
       {settings.error ? (
         <ErrorState error={settings.error} onRetry={() => void settings.reload()} />
       ) : !settings.data ? (

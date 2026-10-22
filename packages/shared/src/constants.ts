@@ -121,7 +121,7 @@ export const METRIC_DEFINITIONS = {
   elapsed_ci95_ms: { label: "95% CI half-width", unit: "ms", better: "lower", description: "Half-width of the 95% confidence interval of the mean (Student t)." },
   elapsed_cv_pct: { label: "Coefficient of variation", unit: "%", better: "lower", description: "Std deviation / mean. Above ~10% indicates a noisy measurement." },
   ops_per_sec: { label: "Operations/s", unit: "ops/s", better: "higher", description: "Workload units processed per second, from the mean of per-iteration rates." },
-  peak_rss_bytes: { label: "Peak RSS (OS)", unit: "bytes", better: "lower", description: "Peak resident set size of the runner process as reported by the OS after exit." },
+  peak_rss_bytes: { label: "Peak RSS (OS)", unit: "bytes", better: "lower", description: "Peak resident set size reported by the OS after exit (runner process; the server process for HTTP)." },
   inproc_rss_max_bytes: { label: "Max RSS (in-process)", unit: "bytes", better: "lower", description: "Largest process.memoryUsage().rss sampled after each measured iteration." },
   heap_used_max_bytes: { label: "Max heap used", unit: "bytes", better: "lower", description: "Largest engine-reported heapUsed after an iteration. V8 and JavaScriptCore count differently; do not compare directly." },
   http_rps: { label: "Throughput", unit: "req/s", better: "higher", description: "Successful responses per second, mean of measured iterations. Failed requests are excluded." },

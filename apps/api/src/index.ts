@@ -1,18 +1,29 @@
 import { getRunnerPaths } from "@bunbench/benchmark-core/orchestrator";
 import { createApp } from "./app.ts";
-import { isLoopback, loadConfig } from "./config.ts";
+import { type AppConfig, isLoopback, loadConfig, unsafeExposureError } from "./config.ts";
 import { migrate, openDatabase } from "./db/database.ts";
 import { RunRepository } from "./db/repository.ts";
 import { BenchmarkService } from "./services/benchmark-service.ts";
 import { RunEventBus } from "./services/event-bus.ts";
 import { RuntimeService } from "./services/runtime-service.ts";
 
-const config = loadConfig();
+let config: AppConfig;
+try {
+  config = loadConfig();
+} catch (error) {
+  console.error(`[bunbench] ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+}
 
+const exposureError = unsafeExposureError(config);
+if (exposureError) {
+  console.error(`[bunbench] ${exposureError}`);
+  process.exit(1);
+}
 if (!isLoopback(config.host)) {
   console.warn(
-    `[bunbench] WARNING: binding to ${config.host}. BunBench has no authentication and launches processes.` +
-      " Do not expose it to untrusted networks (see docs/security.md).",
+    `[bunbench] Binding to ${config.host}. ${config.apiToken ? "State-changing requests require the API token." : "WARNING: authentication is disabled (BUNBENCH_ALLOW_UNAUTHENTICATED=true)."}` +
+      " Serve it over HTTPS behind a reverse proxy (see docs/deployment.md).",
   );
 }
 

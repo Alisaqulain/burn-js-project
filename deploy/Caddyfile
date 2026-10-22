@@ -1,0 +1,10 @@
+# HTTPS termination for the BunBench API. Caddy obtains certificates automatically for API_DOMAIN.
+# The browser loads the frontend over HTTPS from Vercel, so the API must be HTTPS too
+# (mixed http content is blocked).
+{$API_DOMAIN} {
+	# No response compression: it would buffer the Server-Sent Events progress stream.
+	reverse_proxy api:3001 {
+		# Stream SSE immediately.
+		flush_interval -1
+	}
+}

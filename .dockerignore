@@ -1,0 +1,15 @@
+**/node_modules
+**/dist
+.git
+.vercel
+data
+backups
+coverage
+*.sqlite*
+.env
+.env.*
+!.env.example
+**/test
+**/integration
+apps/web/src
+docs

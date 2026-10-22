@@ -227,6 +227,8 @@ export interface HealthInfo {
   uptimeSeconds: number;
   database: { ok: boolean; path: string; schemaVersion: number; runCount: number };
   queue: { running: number; queued: number; maxConcurrent: number };
+  /** Whether state-changing requests need an Authorization: Bearer token. */
+  auth: { required: boolean };
 }
 
 export interface SettingsResponse {

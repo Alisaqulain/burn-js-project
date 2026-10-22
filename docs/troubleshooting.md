@@ -12,6 +12,19 @@ Bun is installed in `~/.bun/bin` (Windows: `%USERPROFILE%\.bun\bin`). Open a new
 The API isn't running, or it is on a different port. Start everything with `bun run dev`.
 - In dev mode, Vite proxies `/api` to `http://127.0.0.1:3001`. Set `BUNBENCH_API_URL` when starting Vite if the API runs elsewhere.
 
+### "The BunBench API was not found" / `Unexpected response (HTTP 404)` / `BAD_RESPONSE` on Vercel
+The frontend is calling an API that is not there. On Vercel, the site only serves static files, so `https://<site>/api/...` returns Vercel's HTML 404.
+1. Deploy the API host (see [deployment.md](deployment.md)).
+2. Set `VITE_API_BASE=https://<your-api-host>` in Vercel (Production) and **redeploy**. The value is baked in at build time.
+3. Check Settings → API access: "API endpoint" must show your API host, not the Vercel domain.
+
+### "Access token required" (`401 UNAUTHORIZED`)
+The API has `BUNBENCH_API_TOKEN` set. Paste the token under Settings → API access (it is stored in this browser only).
+
+### Network error from the Vercel site (CORS or mixed content)
+- **Origin not allowed.** The API must list the site's exact origin (for example `https://bunbench.vercel.app`) in `BUNBENCH_CORS_ORIGINS`. Restart the API after changing it.
+- **Mixed content.** The API must use HTTPS: browsers block `http://` requests from an `https://` page.
+
 ### `403 ORIGIN_NOT_ALLOWED`
 Add the page's origin (scheme://host:port) to `BUNBENCH_CORS_ORIGINS` in `.env` and restart the API.
 

@@ -7,6 +7,7 @@
 - **Request bodies** must be `application/json` (otherwise 415) and at most 64 KiB (otherwise 413).
 - **Timeout.** Non-streaming requests time out after 20 s (504).
 - **Identifiers** are UUIDs and are validated before any database access (400 if malformed).
+- **Authentication.** When the server sets `BUNBENCH_API_TOKEN`, POST, PUT and DELETE requests need `Authorization: Bearer <token>`. GET requests are public. `GET /api/health` reports `auth.required`.
 
 ## Endpoints
 
@@ -59,6 +60,7 @@ For HTTP, `requests × iterations` must be ≤ 400,000. Unknown keys are rejecte
 | Status | Code |
 |---|---|
 | 400 | `VALIDATION_ERROR` (with `details: [{path, message}]`), `LIMIT_EXCEEDED`, `INVALID_JSON` |
+| 401 | `UNAUTHORIZED`: a state-changing request without a valid `Authorization: Bearer` token, when `BUNBENCH_API_TOKEN` is set |
 | 403 | `ORIGIN_NOT_ALLOWED` (state-changing request from an origin not in `BUNBENCH_CORS_ORIGINS`) |
 | 404 | `NOT_FOUND` |
 | 409 | `CONFLICT`, `RUN_ACTIVE` |

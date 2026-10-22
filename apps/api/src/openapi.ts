@@ -38,7 +38,7 @@ export const openApiDocument = {
     title: "BunBench API",
     version: "0.1.0",
     description:
-      "Local-only API that runs Bun and Node.js benchmarks as separate processes. No authentication: bind to localhost only. See docs/security.md.",
+      "API that runs Bun and Node.js benchmarks as separate processes. When BUNBENCH_API_TOKEN is set, POST/PUT/DELETE require Authorization: Bearer <token>; GET is public. See docs/security.md.",
   },
   servers: [{ url: "http://127.0.0.1:3001" }],
   paths: {
@@ -67,6 +67,7 @@ export const openApiDocument = {
           202: success("Run created and queued", "#/components/schemas/RunDetail"),
           200: success("Existing run returned for a repeated Idempotency-Key", "#/components/schemas/RunDetail"),
           400: errorResponse("Validation error or limit exceeded"),
+          401: errorResponse("Missing or invalid Authorization: Bearer token (when BUNBENCH_API_TOKEN is set)"),
           415: errorResponse("Body is not application/json"),
           429: errorResponse("Rate limited (see Retry-After)"),
           503: errorResponse("Queue full"),

@@ -19,6 +19,7 @@
     "dev:web": "bun run --cwd apps/web dev",
     "start": "bun apps/api/src/index.ts",
     "build": "bun scripts/build.ts",
+    "build:web": "bun run --cwd apps/web build",
     "typecheck": "bun scripts/typecheck.ts",
     "lint": "eslint .",
     "test": "bun scripts/test.ts unit",

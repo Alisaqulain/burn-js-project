@@ -1,0 +1,43 @@
+# Production stack for the BunBench API on a VPS: the API container plus Caddy for automatic HTTPS.
+# Usage (from this directory):
+#   cp api.env.example api.env      # then edit: token, CORS origin
+#   API_DOMAIN=api.your-domain.example docker compose up -d --build
+# The API port is not published; only Caddy (80/443) is reachable from outside.
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    env_file: api.env
+    environment:
+      BUNBENCH_HOST: 0.0.0.0
+      BUNBENCH_TRUST_PROXY: "true"
+    volumes:
+      - bunbench-data:/data
+    expose:
+      - "3001"
+    # Keep benchmarks from starving the host. Adjust to the machine; do not run other workloads here.
+    cpus: "4"
+    mem_limit: 3g
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Set API_DOMAIN to the DNS name that points at this server}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  bunbench-data:
+  caddy-data:
+  caddy-config:

@@ -21,6 +21,13 @@ export const safeStorage = {
       // ignore
     }
   },
+  remove(key: string): void {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // ignore
+    }
+  },
 };
 
 export function newIdempotencyKey(): string {

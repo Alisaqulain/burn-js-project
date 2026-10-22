@@ -106,6 +106,9 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     nodePathOverride: undefined,
     rateLimitPerMinute: 100,
     exposePaths: true,
+    apiToken: undefined,
+    allowUnauthenticated: false,
+    trustProxy: false,
     repoRoot: process.cwd(),
     webDistDir: "/nonexistent-web-dist",
     ...overrides,
@@ -120,7 +123,7 @@ export function createTestApp(options: { executor?: (o: ExecuteOptions) => Promi
   const runtimes = new RuntimeService({ exposePaths: true }, fakeDetector);
   const service = new BenchmarkService({ repo, bus, runtimes, paths: getRunnerPaths(), executor: options.executor ?? fakeExecutor });
   const config = testConfig(options.config);
-  const app = createApp({ config, repo, bus, runtimes, service, clientKey: () => "test-client" });
+  const app = createApp({ config, repo, bus, runtimes, service, ...(config.trustProxy ? {} : { clientKey: () => "test-client" }) });
   return { app, repo, bus, service, db, config };
 }
 

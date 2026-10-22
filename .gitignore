@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-node_modules
-=======
 node_modules/
 dist/
 coverage/
@@ -19,6 +16,8 @@ backups/
 .env
 .env.local
 .env.*.local
+!.env.example
+deploy/api.env
 
 # OS / editor
 .DS_Store
@@ -27,4 +26,6 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 *.log
->>>>>>> 8fdb731 (pushing project)
+
+# Vercel
+.vercel
